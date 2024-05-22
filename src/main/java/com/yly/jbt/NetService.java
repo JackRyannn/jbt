@@ -22,10 +22,21 @@ public interface NetService {
     @Post("https://api.yzyhealth.com/urApi/patient/updateDefaultStatus")
     String setDefault(@JSONBody String body);
 
-
-
     @MyHeaders
     @Post("https://api.yzyhealth.com/urApi/doctorTeamPatientSigning/apply")
     String apply(@JSONBody String body);
+
+
+    @AppHeaders
+    @Post("https://api.yzyhealth.com/drApi/workHome/queryNewPatient")
+    String receiveQuery(@JSONBody String body);
+
+    @AppHeaders
+    @Post("https://api.yzyhealth.com/drApi/doctorTeamPatientSigning/agree")
+    String agree(@JSONBody String body);
+
+    @AppHeaders
+    @Post("https://api.yzyhealth.com/drApi/doctorTeamPatientSigning/update")
+    String update(@JSONBody String body);
 
 }

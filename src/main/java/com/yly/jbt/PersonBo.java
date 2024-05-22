@@ -8,7 +8,7 @@ public class PersonBo {
     String id;
     String tel;
     String sex;
-    String address;
+    String address = "";
     String birthday;
     String territory;
 

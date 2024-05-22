@@ -21,12 +21,14 @@ public class MainController {
 
     @PostConstruct
     public void main() {
+//      addAndApply();
+        receive();
+    }
+
+
+    public void addAndApply() {
         Gson gson = new Gson();
-
-
-
         String filePath = "/Users/m/Downloads/jbt/src/main/java/com/yly/jbt/test.txt";
-
         List<PersonBo> bos = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -40,9 +42,8 @@ public class MainController {
                     bo.setSex("1");
                 } else {
                     bo.setSex("2");
-
                 }
-                bo.setAddress(ss[4]);
+//                bo.setAddress(ss[4]);
                 bo.setBirthday(bo.getId().substring(6, 10) + "-" + bo.getId().substring(10, 12) + "-" + bo.getId().substring(12, 14));
                 bo.setTerritory(bo.getId().substring(0, 6));
 
@@ -77,20 +78,20 @@ public class MainController {
 
         QueryBo queryBo = new QueryBo();
         queryBo.setPageNo(1);
-        queryBo.setPageSize(100);
+        queryBo.setPageSize(500);
         String queryStr = gson.toJson(queryBo);
-        QueryRespBo respBo = gson.fromJson(netService.query(queryStr),QueryRespBo.class);
+        QueryRespBo respBo = gson.fromJson(netService.query(queryStr), QueryRespBo.class);
 
 
         for (QueryRespBo.Data.Record record : respBo.getData().records) {
-            if(record.relationship.equals("1")){
+            if (record.relationship.equals("1")) {
                 System.out.println("申请-跳过本人");
                 continue;
             }
             ApplyBo applyBo = new ApplyBo();
             applyBo.setDoctorTeamNo("DT2301161620168754556");
             applyBo.setPatientNo(record.patientNo);
-            System.out.println("申请-"+record.realName);
+            System.out.println("申请-" + record.realName);
             System.out.println(netService.apply(gson.toJson(applyBo)));
         }
 
@@ -98,7 +99,7 @@ public class MainController {
         System.out.println("开始删除");
 
         for (QueryRespBo.Data.Record record : respBo.getData().records) {
-            if(record.relationship.equals("1")){
+            if (record.relationship.equals("1")) {
                 System.out.println("删除-跳过本人");
                 DefaultBo defaultBo = new DefaultBo();
                 defaultBo.setPatientNo(record.patientNo);
@@ -107,8 +108,34 @@ public class MainController {
             }
             DeleteBo deleteBo = new DeleteBo();
             deleteBo.setPatientNo(record.patientNo);
-            System.out.println("删除-"+record.realName);
+            System.out.println("删除-" + record.realName);
             System.out.println(netService.delete(gson.toJson(deleteBo)));
+        }
+    }
+
+    public void receive() {
+        Gson gson = new Gson();
+        ReceiveQueryBo queryBo = new ReceiveQueryBo();
+        queryBo.setPageNo(1);
+        queryBo.setPageSize(500);
+        String queryStr = gson.toJson(queryBo);
+        String retStr = netService.receiveQuery(queryStr);
+        System.out.println(retStr);
+        ReceiveQueryRespBo respBo = gson.fromJson(retStr, ReceiveQueryRespBo.class);
+
+        for (ReceiveQueryRespBo.Data.Record record : respBo.getData().records) {
+            System.out.println("接收：" + record.patientName);
+            AgreeBo agreeBo = new AgreeBo();
+            agreeBo.setSigningApplyNo(record.signingApplyNo);
+            System.out.println(netService.agree(gson.toJson(agreeBo)));
+            UpdateBo updateBo = new UpdateBo();
+            updateBo.setPatientNo(record.patientNo);
+            System.out.println(netService.update(gson.toJson(updateBo)));
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
